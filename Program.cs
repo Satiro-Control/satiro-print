@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,8 @@ var app = builder.Build();
 
 app.UseCors();
 
-// busca impressoras
+app.MapGet("/status", () => Results.Ok(new { status = "online" }));
+
 app.MapGet("/impressoras", () =>
 {
     var impressoras = PrinterSettings.InstalledPrinters.Cast<string>().ToList();
