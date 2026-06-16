@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
-using System.Collections.Generic;
+using System.Threading;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +26,8 @@ app.MapGet("/impressoras", () =>
     return Results.Ok(impressoras);
 });
 
-app.MapPost("/imprimir", async (HttpContext context) =>
+// adicionado cancellationtoken para suportar timeout do frontend
+app.MapPost("/imprimir", async (HttpContext context, CancellationToken cancellationToken) =>
 {
     try
     {
@@ -35,15 +36,19 @@ app.MapPost("/imprimir", async (HttpContext context) =>
         if (string.IsNullOrEmpty(impressora))
             return Results.BadRequest("impressora nao informada");
 
+        var pd = new PrintDocument();
+        pd.PrinterSettings.PrinterName = impressora;
+
+        // valida se a impressora existe e esta mapeada no spooler
+        if (!pd.PrinterSettings.IsValid)
+            return Results.BadRequest("impressora invalida ou inacessivel");
+
         using var ms = new MemoryStream();
-        await context.Request.Body.CopyToAsync(ms);
+        await context.Request.Body.CopyToAsync(ms, cancellationToken);
         ms.Position = 0;
 
         using (var doc = PdfDocument.Load(ms))
         {
-            var pd = new PrintDocument();
-            pd.PrinterSettings.PrinterName = impressora;
-            
             var pdfSize = doc.PageSizes[0];
             int w = (int)((pdfSize.Width / 72.0) * 100);
             int h = (int)((pdfSize.Height / 72.0) * 100);
@@ -62,6 +67,11 @@ app.MapPost("/imprimir", async (HttpContext context) =>
         }
 
         return Results.Ok();
+    }
+    catch (OperationCanceledException)
+    {
+        // retorna 499 se o cliente (react) cancelar a requisicao por timeout
+        return Results.StatusCode(499);
     }
     catch (Exception ex)
     {
