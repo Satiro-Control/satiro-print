@@ -131,10 +131,10 @@ namespace SatiroPrint
             builder.Logging.ClearProviders();
 
             builder.Services.AddCors(options =>
-                options.AddDefaultPolicy(p =>
-                    p.WithOrigins("http://localhost", "http://127.0.0.1")
-                     .AllowAnyHeader()
-                     .AllowAnyMethod()));
+    options.AddDefaultPolicy(p =>
+        p.SetIsOriginAllowed(_ => true)
+         .AllowAnyHeader()
+         .AllowAnyMethod()));
 
             builder.WebHost.ConfigureKestrel(options =>
             {

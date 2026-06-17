@@ -1,7 +1,7 @@
 [Setup]
 AppId={{9A1B2C3D-4E5F-6A7B-8C9D-0E1F2A3B4C5D}
 AppName=Satiro Print
-AppVersion=1.1
+AppVersion=1.2
 AppPublisher=Satiro Solucoes Tecnologicas
 AppComments=Instalador Satiro Print, necessario para imprimir etiquetas em impressoras termicas.
 DefaultDirName={autopf}\Satiro Print
