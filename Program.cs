@@ -26,7 +26,6 @@ app.MapGet("/impressoras", () =>
     return Results.Ok(impressoras);
 });
 
-// adicionado cancellationtoken para suportar timeout do frontend
 app.MapPost("/imprimir", async (HttpContext context, CancellationToken cancellationToken) =>
 {
     try
